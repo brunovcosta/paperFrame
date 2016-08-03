@@ -1,18 +1,7 @@
-/*
- * Assim como em AngularJs, temos as diretivas de evento
- *
- * Elas podem ser usadas da seguinte forma:
- * pf-click="console.log(this);console.log(event)"
- * pf-keyup="post[0].content=''"
- * e assim por diante.
- *
- * Temos também a diretiva pf-include="nomeDoFilho" que troca para este Nó
- * o container do filho cujo nome em children é 'nomeDoFilho'
- *
- */
 declare var $ : any ;
+declare var JST : any ;
 
-class Controller{
+class ModuleController{
 	container : HTMLElement;
 	template : any;
 	children : any;
@@ -28,6 +17,7 @@ class Controller{
 			this.container.innerHTML=this.template(this.$scope);
 			this.bindIf();
 			this.bindProc();
+			this.bindPartials();
 			this.includeProc();
 			Object.keys(this.children).forEach((key : string)=>{
 				let child : ModuleController = this.children[key];
@@ -40,6 +30,11 @@ class Controller{
 			let controller : ModuleController = this.children[$(pfElement).attr("pf-include")];
 			if(controller)
 				controller.container = pfElement;
+		});
+	}
+	private bindPartials(){
+		$(this.container).find("[pf-partial]").each((index : number , pfElement : HTMLElement)=>{
+			pfElement.innerHTML = JST[$(pfElement).attr("pf-partial")](this.$scope);
 		});
 	}
 	private bindProc(){
@@ -73,4 +68,5 @@ class Controller{
 			}
 		});
 	}
+	init(){}
 }
