@@ -11,8 +11,8 @@ loop do
 	if $new_md5!=$md5
 		$md5 = $new_md5
 		puts "change detected"
-		puts "#{ARGV[1]}"
-		`#{ARGV[1]}`
+		print "#{ARGV[1]}: "
+		puts `#{ARGV[1]}`
 		puts "done!\n\n"
 	end
 	sleep 1
