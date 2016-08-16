@@ -1,5 +1,4 @@
-declare var $ : any ;
-declare var JST : any ;
+///<reference path="./DOMQuery.ts" />
 
 class ModuleController{
 	container : HTMLElement;
@@ -17,7 +16,8 @@ class ModuleController{
 			this.container.innerHTML=this.template(this.$scope);
 			this.bindIf();
 			this.bindProc();
-			this.bindPartials();
+			this.bindModel();
+			//this.bindPartials();
 			this.includeProc();
 			Object.keys(this.children).forEach((key : string)=>{
 				let child : ModuleController = this.children[key];
@@ -30,11 +30,6 @@ class ModuleController{
 			let controller : ModuleController = this.children[$(pfElement).attr("pf-include")];
 			if(controller)
 				controller.container = pfElement;
-		});
-	}
-	private bindPartials(){
-		$(this.container).find("[pf-partial]").each((index : number , pfElement : HTMLElement)=>{
-			pfElement.innerHTML = JST[$(pfElement).attr("pf-partial")](this.$scope);
 		});
 	}
 	private bindProc(){
@@ -68,5 +63,31 @@ class ModuleController{
 			}
 		});
 	}
+	_init(){
+		this.init();
+		Object.keys(this.children).forEach((key : string)=>{
+			this.children[key]._init();
+		});
+	}
 	init(){}
+	bindModel(){
+		$(this.container).find("[pf-model]").each((elementIndex : number,pfElement : any)=>{
+			var path = $(pfElement).attr("pf-model");
+
+			var indexAccess = (obj : any,is : any, value : any = undefined) => {
+				if (typeof is == 'string')
+					return indexAccess(obj,is.split('.'), value);
+				else if (is.length==1 && value!==undefined)
+					return obj[is[0]] = value;
+				else if (is.length==0)
+					return obj;
+				else
+					return indexAccess(obj[is[0]],is.slice(1), value);
+			}
+			$(pfElement).val(indexAccess(this.$scope,path));
+			$(pfElement).change(()=>{
+				indexAccess(this.$scope,path,$(pfElement).val());
+			});
+		});
+	}
 }

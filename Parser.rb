@@ -22,9 +22,9 @@ def normal_replace string
 	first = $open_tag.size
 	last = -$close_tag.size-1
 	return string.gsub(/#{$open_tag}.*?#{$close_tag}/) do |b|
-		next %{";
+		next %{");
 	#{b[first..last]};
-	_out+="}.gsub /\\\"/,"\""
+	_out.push("}.gsub /\\\"/,"\""
 	end
 end
 
@@ -32,28 +32,24 @@ def puts_replace string
 	first = $puts_tag.size
 	last = -$close_tag.size-1
 	return string.gsub(/#{$puts_tag}.*?#{$close_tag}/) do |b|
-		next %{";
-	_out+=(#{b[first..last]});
-	_out+="}.gsub /\\\"/,"\""
+		next %{");
+	_out.push(#{b[first..last]});
+	_out.push("}.gsub /\\\"/,"\""
 	end
 end
 
 def surround_function template_name,string
 	return %{
 #{$template_object}["#{template_name}"]=function(scope){
-	with(scope){
-		var _out = "";
-		_out+="#{string}";
-		return _out;
+	with(scope||{}){
+		var _out = [];
+		_out.push("#{string}");
+		return _out.join("");
 	}
 };}
 end
 
-def quotes_escape string
-	return string.gsub "\"","\\\""
-end
-
 def remove_special string
-	return string.gsub /\t|\n/,""
+	return string.gsub(/\\/,'\\').gsub(/\"/,'\"').gsub(/\n/,'\n').gsub(/\t/,'\t').gsub(/\n/,'\n')
 end
-puts remove_special(surround_function($template_name,normal_replace(puts_replace(quotes_escape(raw_text)))))
+puts surround_function($template_name,normal_replace(puts_replace(remove_special(raw_text))))
